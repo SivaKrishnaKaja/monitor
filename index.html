@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitor</title>
+</head>
+<body>
+
+    <h1>CPU & Memory Monitor</h1>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>CPU (%)</th>
+                <th>Memory (%)</th>
+            </tr>
+        </thead>
+        <tbody id="data">
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch("http://127.0.0.1:8000/metrics");
+            const data = await response.json();
+
+            let table = "";
+            data.forEach(item => {
+                table += `<tr>
+                    <td>${item.time}</td>
+                    <td>${item.cpu}</td>
+                    <td>${item.memory}</td>
+                </tr>`;
+            });
+
+            document.getElementById("data").innerHTML = table;
+        }
+
+        // Fetch every 3 seconds
+        setInterval(fetchData, 3000);
+
+        fetchData();
+    </script>
+
+</body>
+</html>
