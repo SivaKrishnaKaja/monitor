@@ -3,26 +3,24 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, Float, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, Float, DateTime
+from sqlalchemy.orm import declarative_base, sessionmaker
+from database import engine
 
 app = FastAPI()
 
-# Database setup
-engine = create_engine("sqlite:///metrics.db")
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-# Table model
+
 class MetricsDB(Base):
     __tablename__ = "metrics"
+
     id = Column(Integer, primary_key=True, index=True)
     cpu = Column(Float)
     memory = Column(Float)
     time = Column(DateTime)
 
-# Create table
 Base.metadata.create_all(bind=engine)
 
 # Request model
@@ -30,7 +28,7 @@ class Metrics(BaseModel):
     cpu: float
     memory: float
 
-# POST API → Save to DB
+# POST API
 @app.post("/metrics")
 def add_metrics(data: Metrics):
     db = SessionLocal()
@@ -45,9 +43,9 @@ def add_metrics(data: Metrics):
     db.commit()
     db.close()
 
-    return {"message": "Saved to database"}
+    return {"message": "Saved"}
 
-# GET API → Read from DB
+# GET API
 @app.get("/metrics")
 def get_metrics():
     db = SessionLocal()
@@ -55,6 +53,7 @@ def get_metrics():
     db.close()
     return data
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
